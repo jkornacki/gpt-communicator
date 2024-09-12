@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -41,10 +42,12 @@ class ConversationItemsEntity {
     @Enumerated(EnumType.STRING)
     private SendBy sendBy;
 
-    @Column(name = "prompt")
+    @Lob
+    @Column(name = "prompt", columnDefinition = "text")
     private String prompt;
 
-    @Column(name = "content")
+    @Lob
+    @Column(name = "content", columnDefinition = "text")
     private String content;
 
     @Column(name = "created_at")

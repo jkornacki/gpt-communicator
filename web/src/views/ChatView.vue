@@ -8,7 +8,7 @@
     <!-- Main content area -->
     <div class="flex flex-1 overflow-hidden">
       <nav class="w-64 bg-gray-100 p-4 border-r">
-        <router-link class="text-blue-600 dark:text-blue-500 hover:underline" to="/" >New Chat</router-link>
+        <router-link class="text-blue-600 dark:text-blue-500 hover:underline" to="/">New Chat</router-link>
         <h2 class="text-2xl text-black">Conversations:</h2>
         <div v-for="conversation in conversations" :key="conversation.id">
           <Conversations :link="conversation.link" :title="conversation.title" :isCurrentConversation="id===conversation.id"/>
@@ -91,8 +91,11 @@ export default defineComponent({
             )
           })
 
-          conversations.value.push({id: conversationId, link: `/conversations/${conversationId}`, title: conversationTitle})
-          router.push(`/conversations/${conversationId}`);
+          if (conversationId.value === undefined) {
+            conversations.value.push({id: conversationId, link: `/conversations/${conversationId}`, title: conversationTitle})
+            router.push(`/conversations/${conversationId}`);
+          }
+
 
         })
       }
@@ -102,7 +105,7 @@ export default defineComponent({
         (newId, oldId) => {
           console.log(`Route param id changed from ${oldId} to ${newId}`);
           conversationId.value = newId;
-          if(newId !== undefined) {
+          if (newId !== undefined) {
             GptApiService.getAllConversation()
                 .then(response => {
                   conversations.value = [];
@@ -117,9 +120,9 @@ export default defineComponent({
                 });
 
             GptApiService.getConversationItems(conversationId.value)
-                .then(conversationApiResponse =>{
+                .then(conversationApiResponse => {
                   conversationItems.value = [];
-                  conversationApiResponse.items.forEach( item => {
+                  conversationApiResponse.items.forEach(item => {
 
                     conversationItems.value.push(
                         {
@@ -151,12 +154,12 @@ export default defineComponent({
                 isCurrentConversation: conversationId.value !== undefined && conversation.conversationId === conversationId.value
               })
             })
-          })
+          });
 
-      if(conversationId.value !== undefined) {
+      if (conversationId.value !== undefined) {
         GptApiService.getConversationItems(conversationId.value)
-            .then(conversationApiResponse =>{
-              conversationApiResponse.items.forEach( item => {
+            .then(conversationApiResponse => {
+              conversationApiResponse.items.forEach(item => {
 
                 conversationItems.value.push(
                     {
