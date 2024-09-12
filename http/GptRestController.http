@@ -1,0 +1,26 @@
+### FOR IDEA INTELLIJ HTTP CLIENT
+
+### SEND anthropic prompt
+POST http://localhost:7070/api/anthropic
+Content-Type: application/json
+
+{
+  "prompt": "Przygotuj Hello World w spring boot"
+}
+
+
+### SEND anthropic prompt
+POST http://localhost:7070/api/conversation/6/anthropic
+Content-Type: application/json
+
+{
+  "prompt": "Przygotuj Hello World w K8S"
+}
+
+
+
+### GET all conversation
+GET http://localhost:7070/api/conversations
+
+### GET conversation by ID
+GET http://localhost:7070/api/conversation/9
