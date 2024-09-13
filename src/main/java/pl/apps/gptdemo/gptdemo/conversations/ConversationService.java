@@ -3,6 +3,7 @@ package pl.apps.gptdemo.gptdemo.conversations;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.apps.gptdemo.gptdemo.GptConfiguration;
 import pl.apps.gptdemo.gptdemo.api.ConversationApiResponse;
 import pl.apps.gptdemo.gptdemo.api.ConversationItemDto;
 import pl.apps.gptdemo.gptdemo.api.ConversationWithItemsApiResponse;
@@ -22,18 +23,19 @@ public class ConversationService {
 
     private final ConversationRepositoryPort conversationRepositoryPort;
     private final ConversationMapper conversationMapper;
+    private final GptConfiguration configuration;
     private final GptApiClient gptApiClient;
 
     @Transactional
     public PromptApiResponse sendPromptForNewConversation(String prompt) {
 
         ClaudeApiClientResponse promptApiResponse = gptApiClient.sendRequest(
-                ClaudeApiClientRequest.createNewMessage(prompt)
+                ClaudeApiClientRequest.createNewMessage(prompt, configuration.getAnthropicSystemPrompt())
         );
 
         var promptResponse = promptApiResponse.getFirstContentText();
         var titleResponse = gptApiClient.sendRequest(
-                ClaudeApiClientRequest.createPromptForTitleCreate(prompt, promptResponse)
+                ClaudeApiClientRequest.createPromptForTitleCreate(prompt, promptResponse, configuration.getAnthropicSystemTitlePrompt())
         );
 
         Conversation conversation = Conversation.createNew(prompt, promptResponse, titleResponse.getFirstContentText());
@@ -86,7 +88,7 @@ public class ConversationService {
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
         ClaudeApiClientResponse promptApiResponse = gptApiClient.sendRequest(
-                ClaudeApiClientRequest.createNewMessage(prompt)
+                ClaudeApiClientRequest.createNewMessage(prompt, configuration.getAnthropicSystemPrompt())
         );
 
         var promptResponse = promptApiResponse.getFirstContentText();

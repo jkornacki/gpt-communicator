@@ -27,7 +27,11 @@ class AnthropicApiClient implements GptApiClient {
         );
     }
 
-    private AnthropicApiClient(Boolean skipSSL, String apiKey, String proxyHost, String proxyPort) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    private AnthropicApiClient(Boolean skipSSL,
+                               String apiKey,
+                               String proxyHost,
+                               String proxyPort
+    ) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
         this.apiKey = apiKey;
         var builder = RestClient.builder();
@@ -37,7 +41,6 @@ class AnthropicApiClient implements GptApiClient {
         }
 
         this.restClient = builder.build();
-
     }
 
     @Override

@@ -18,11 +18,11 @@ public record ClaudeApiClientRequest(
 
 ) {
 
-    public static ClaudeApiClientRequest createNewMessage(String prompt) {
+    public static ClaudeApiClientRequest createNewMessage(String prompt, String systemPrompt) {
         return ClaudeApiClientRequest.builder()
                 .model("claude-3-5-sonnet-20240620")
                 .maxTokens(1024)
-                .system("Jako asystent programisty przygotuj odpowiedzi na wskazane pytanie. Wszystkie odpowiedzi przygotuj w formacie Mark Down. Pamiętaj aby do wszystkich przykładów kodu dodaj ```<LANGUAGE> np ```SQL\nKOD```")
+                .system(systemPrompt)
                 .messages(List.of(
                         UserMessage.builder()
                                 .content(prompt)
@@ -32,14 +32,11 @@ public record ClaudeApiClientRequest(
     }
 
 
-    public static ClaudeApiClientRequest createPromptForTitleCreate(String prompt, String firstPromptResponse) {
+    public static ClaudeApiClientRequest createPromptForTitleCreate(String prompt, String firstPromptResponse, String systemPrompt) {
         return ClaudeApiClientRequest.builder()
                 .model("claude-3-5-sonnet-20240620")
                 .maxTokens(512)
-                .system("Jako asystent przygotuj tytuł pasujący do przekazanego tekstu. " +
-                        "Język w którym zostanie zwrócony tytuł dostosuj do języka w którym jest on przekazany. " +
-                        "Tytuł może zawierać maksymalnie 75 znaków. " +
-                        "Pamiętaj aby zmieścić się w tym limicie. Idealny tytuł to taki który składa się z 2-4 słów")
+                .system(systemPrompt)
                 .messages(List.of(
                         UserMessage.builder()
                                 .content(firstPromptResponse)
@@ -76,6 +73,7 @@ public record ClaudeApiClientRequest(
     public interface Message {
         @JsonProperty("role")
         String role();
+
         @JsonProperty("content")
         String content();
     }

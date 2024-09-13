@@ -10,11 +10,11 @@ Content-Type: application/json
 
 
 ### SEND anthropic prompt
-POST http://localhost:7070/api/conversation/6/anthropic
+POST http://localhost:7070/api/conversation/1/anthropic
 Content-Type: application/json
 
 {
-  "prompt": "Przygotuj Hello World w K8S"
+  "prompt": "Prepare Hello World w K8S"
 }
 
 
