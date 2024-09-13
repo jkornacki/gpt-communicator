@@ -30,6 +30,7 @@ const props = defineProps({
   }
 })
 
+
 // Przetworzony HTML
 const processedHtml = ref('')
 
@@ -92,12 +93,17 @@ const processHtml = (html) => {
   });
 
   processedHtml = tempDiv.innerHTML
-
+  hljs.configure({ ignoreUnescapedHTML: true });
 
   setTimeout(() => {
     document.querySelectorAll('pre code').forEach((block) => {
-      hljs.highlightBlock(block)
-    })
+      if (block.dataset.highlighted) {
+        delete block.dataset.highlighted;
+      }
+
+      hljs.highlightElement(block);
+      block.dataset.highlighted = true;
+    });
 
     // Dodanie przycisku "Copy to Clipboard" do każdego <pre>
     document.querySelectorAll('pre').forEach(pre => {

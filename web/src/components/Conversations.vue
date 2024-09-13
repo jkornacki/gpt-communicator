@@ -1,7 +1,12 @@
 <template>
   <div class="conversations font-extrabold text-black text-lg">
-    - <router-link class="text-blue-600 dark:text-blue-500 hover:underline" :to="link" v-if="!isCurrentConversation">{{ title }}</router-link>
-    - <router-link class="text-blue-700 dark:text-blue-700 hover:underline text-2xl" :to="link" v-if="isCurrentConversation">{{ title }}</router-link>
+    <span v-if="!isCurrentConversation">
+      - <router-link class="text-blue-950 dark:text-blue-500 hover:underline" :to="link" v-if="!isCurrentConversation">{{ title }}</router-link>
+    </span>
+    <span v-if="isCurrentConversation">
+      - <router-link class="text-blue-950 dark:text-blue-700 hover:underline bg-emerald-100" :to="link" v-if="isCurrentConversation">{{ title }}</router-link>
+    </span>
+
   </div>
 </template>
 

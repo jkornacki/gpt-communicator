@@ -8,15 +8,15 @@
     <!-- Main content area -->
     <div class="flex flex-1 overflow-hidden">
       <nav class="w-64 bg-gray-100 p-4 border-r">
-        <router-link class="text-blue-600 dark:text-blue-500 hover:underline" to="/">New Chat</router-link>
+        <router-link class="text-blue-600 text-2xl dark:text-blue-500 hover:underline" to="/">New Chat</router-link>
         <h2 class="text-2xl text-black">Conversations:</h2>
         <div v-for="conversation in conversations" :key="conversation.id">
-          <Conversations :link="conversation.link" :title="conversation.title" :isCurrentConversation="id===conversation.id"/>
+          <Conversations :link="conversation.link" :title="conversation.title" :isCurrentConversation="conversation.isCurrentConversation"/>
         </div>
       </nav>
 
       <main class="flex-1 flex flex-col overflow-hidden bg-white">
-        <div class="flex-1 p-4 overflow-y-auto">
+        <div class="flex-1 p-4 overflow-y-auto" id="chat-content">
 
           <div v-for="item in conversationItems" :key="item.id">
             <ConversationItem :item-id="item.id" :html-to-render="item.htmlToRender" :send-by="item.sendBy"/>
@@ -30,6 +30,8 @@
             <h3 class="font-bold text-lg">Prompt</h3>
             <textarea id="prompt-ta" class="border rounded-2xl w-full h-3/4 p-3 text-xl"/>
             <button
+                v-if="!isSendBtnDisable"
+                :disabled="isSendBtnDisable"
                 @click="handleSend()"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
             </button>
@@ -44,7 +46,7 @@
 
 <script>
 
-import {defineComponent, onMounted, ref, watch} from 'vue';
+import {defineComponent, onMounted, ref, watch, nextTick} from 'vue';
 import {GptApiService} from "@/services/GptApiService.js";
 import Conversations from "@/components/Conversations.vue";
 import {useRoute, useRouter} from "vue-router";
@@ -54,6 +56,7 @@ export default defineComponent({
   name: "ChatView",
   components: {ConversationItem, Conversations},
   setup() {
+    const isSendBtnDisable = ref(false);
     const route = useRoute();
     const router = useRouter();
     const conversationId = ref(route.params.id);
@@ -61,9 +64,21 @@ export default defineComponent({
     const conversations = ref([]);
     const conversationItems = ref([]);
 
+
+    const scrollToBottom = () => {
+      const chatContent = document.getElementById("chat-content");
+      if (chatContent) {
+        chatContent.scroll({
+          top: chatContent.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    };
+
     const handleSend = () => {
       const textarea = document.getElementById('prompt-ta');
       if (textarea) {
+        isSendBtnDisable.value = true;
         const content = textarea.value;
         console.log('Prompt content:', content);
 
@@ -74,10 +89,11 @@ export default defineComponent({
             },
             conversationId.value
         ).then(response => {
+          isSendBtnDisable.value = false;
           console.log(response);
 
-          const conversationId = response.conversationId;
-          const conversationTitle = response.conversationTitle;
+          const responseConversationId = response.conversationId;
+          const responseConversationTitle = response.conversationTitle;
 
           const items = response.items;
           items.forEach(item => {
@@ -92,12 +108,16 @@ export default defineComponent({
           })
 
           if (conversationId.value === undefined) {
-            conversations.value.push({id: conversationId, link: `/conversations/${conversationId}`, title: conversationTitle})
-            router.push(`/conversations/${conversationId}`);
+            conversations.value.push({id: responseConversationId, link: `/conversations/${responseConversationId}`, title: responseConversationTitle, isCurrentConversation: true})
+            router.push(`/conversations/${responseConversationId}`);
           }
 
+          nextTick(() => {
+            scrollToBottom();
+          });
 
-        })
+        });
+
       }
     };
 
@@ -114,7 +134,7 @@ export default defineComponent({
                       id: conversation.conversationId,
                       link: `/conversations/${conversation.conversationId}`,
                       title: conversation.conversationTitle,
-                      isCurrentConversation: newId !== undefined && conversation.conversationId === newId
+                      isCurrentConversation: newId !== undefined && Number(conversation.conversationId) === Number(newId)
                     })
                   })
                 });
@@ -137,6 +157,9 @@ export default defineComponent({
                 });
           } else {
             conversationItems.value = [];
+            conversations.value.forEach(conversations => {
+              conversations.isCurrentConversation = false;
+            })
           }
         }
     );
@@ -151,7 +174,7 @@ export default defineComponent({
                 id: conversation.conversationId,
                 link: `/conversations/${conversation.conversationId}`,
                 title: conversation.conversationTitle,
-                isCurrentConversation: conversationId.value !== undefined && conversation.conversationId === conversationId.value
+                isCurrentConversation: conversationId.value !== undefined && Number(conversation.conversationId) === Number(conversationId.value)
               })
             })
           });
@@ -177,6 +200,7 @@ export default defineComponent({
 
 
     return {
+      isSendBtnDisable,
       conversations,
       conversationItems,
       handleSend,
