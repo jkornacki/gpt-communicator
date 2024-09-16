@@ -1,15 +1,16 @@
 <template>
   <div class="mt-1 text-black mb-4" style="border-top: solid black 1px;">
-    <h5 class="text-2xl text-black" style="border-bottom: 1px dotted #d1d1d1; padding: 1em 0" v-if="sendBy === 'USER' ">
-      Prompt: {{ htmlToRender }}
-    </h5>
+    <div v-if="sendBy === 'USER'">
+      <h5 class="text-2xl text-black" style="border-bottom: 1px dotted #d1d1d1; padding: 1em 0" v-html="displayedHtml"></h5>
+      <button v-if="shouldHidePrompt" @click="toggleShowFullContent">{{ showFullContent ? 'Show Less' : 'Show More' }}</button>
+    </div>
     <div class="response text-xl font-bold text-black" v-if="sendBy === 'GPT'" v-html="processedHtml">
     </div>
   </div>
 </template>
 
 <script setup>
-import {defineProps, onMounted, ref} from 'vue'
+import {defineProps, onMounted, ref, computed } from 'vue'
 import hljs from 'highlight.js'
 import ClipboardJS from 'clipboard'
 import showdown from "showdown";
@@ -30,12 +31,46 @@ const props = defineProps({
   }
 })
 
+const shouldHidePrompt = ref(false);
+const showFullContent = ref(false);
 
+const processedHtml = ref('');
+// Compute the displayed HTML based on the state
+
+const displayedHtml = computed(() => {
+  if (!shouldHidePrompt.value) {
+    return processedHtml.value;
+  }
+  const lines = processedHtml.value.split('<br />');
+  if (showFullContent.value) {
+    return processedHtml.value;
+  } else {
+    return lines.slice(0, 5).join('<br />') + '...';
+  }
+});
 // Przetworzony HTML
-const processedHtml = ref('')
+
+const processPromptHtml = (prompt) => {
+  const lines = prompt.split('\n');
+  if (lines.length > 5) {
+    shouldHidePrompt.value = true;
+  } else {
+    shouldHidePrompt.value = false;
+  }
+  return prompt.replace(/\n/g, "<br />");
+};
+
+const toggleShowFullContent = () => {
+  showFullContent.value = !showFullContent.value;
+};
 
 // Funkcja do przetwarzania HTML
 const processHtml = (html) => {
+
+  if(props.sendBy === 'USER') {
+    return processPromptHtml(html);
+  }
+
   const converter = new showdown.Converter();
   converter.setOption('noHeaderId', true);
   converter.setOption('smartIndentationFix', true);
@@ -93,7 +128,7 @@ const processHtml = (html) => {
   });
 
   processedHtml = tempDiv.innerHTML
-  hljs.configure({ ignoreUnescapedHTML: true });
+  hljs.configure({ignoreUnescapedHTML: true});
 
   setTimeout(() => {
     document.querySelectorAll('pre code').forEach((block) => {
@@ -122,6 +157,8 @@ const processHtml = (html) => {
   })
 
   return processedHtml
+
+
 }
 
 // Przetwarzanie HTML podczas montowania komponentu
