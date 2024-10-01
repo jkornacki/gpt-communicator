@@ -29,7 +29,7 @@ public class Conversation {
     }
 
     public void addItem(String prompt, String promptResponse) {
-        if(items == null) {
+        if (items == null) {
             items = new ArrayList<>();
         }
 
@@ -38,13 +38,17 @@ public class Conversation {
     }
 
     public void setItems(List<ConversationItems> conversationItems) {
-        if(conversationItems == null) {
+        if (conversationItems == null) {
             return;
         }
-        if(items == null) {
+        if (items == null) {
             items = new ArrayList<>();
         }
 
         items.addAll(conversationItems);
+    }
+
+    public void editTitle(String newTitle) {
+        this.title = newTitle;
     }
 }

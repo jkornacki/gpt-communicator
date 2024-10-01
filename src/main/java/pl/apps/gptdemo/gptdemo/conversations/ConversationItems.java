@@ -23,4 +23,8 @@ public class ConversationItems {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
+    public boolean isUserPrompt() {
+        return SendBy.USER.equals(sendBy);
+    }
 }

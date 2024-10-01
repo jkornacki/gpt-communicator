@@ -16,6 +16,7 @@ public class GptConfiguration {
     private final String proxyPort;
     private final String anthropicSystemPrompt;
     private final String anthropicSystemTitlePrompt;
+    private final int defaultNumberOfMessageHistory;
 
     public GptConfiguration(
             @Value("${app.skipSSL:false}") Boolean skipSsl,
@@ -23,7 +24,8 @@ public class GptConfiguration {
             @Value("${app.proxyHost:#{null}}") String proxyHost,
             @Value("${app.proxyPort:#{null}}") String proxyPort,
             @Value("${app.defaultAnthropicSystemPrompt}") String anthropicSystemPrompt,
-            @Value("${app.defaultAnthropicSystemTitlePrompt}") String anthropicSystemTitlePrompt
+            @Value("${app.defaultAnthropicSystemTitlePrompt}") String anthropicSystemTitlePrompt,
+            @Value("${app.defaultNumberOfMessageHistory}") int defaultNumberOfMessageHistory
     ) {
         log.info("SkipSSL: {}", skipSsl);
         log.info("Proxy: host: {} port: {}", proxyHost, proxyPort);
@@ -33,5 +35,6 @@ public class GptConfiguration {
         this.proxyPort = proxyPort;
         this.anthropicSystemPrompt = anthropicSystemPrompt;
         this.anthropicSystemTitlePrompt = anthropicSystemTitlePrompt;
+        this.defaultNumberOfMessageHistory = defaultNumberOfMessageHistory;
     }
 }

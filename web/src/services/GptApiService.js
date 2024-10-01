@@ -1,4 +1,3 @@
-
 const API_URL = "http://localhost:7070";
 
 export class GptApiService {
@@ -6,7 +5,7 @@ export class GptApiService {
 
     static async sendAnthropicPrompt(apiRequest, id) {
 
-        if(id === undefined) {
+        if (id === undefined) {
             return await fetch(`${API_URL}/api/anthropic`, {
                 method: "POST",
                 headers: {
@@ -64,5 +63,22 @@ export class GptApiService {
             }
             return response.json()
         })
+    }
+
+    static async editConversationTitle(conversationId, newTitle) {
+
+
+        return await fetch(`${API_URL}/api/conversation/${conversationId}/title?title=${newTitle}`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.status !== 200) {
+                return Promise.reject("error");
+            }
+            return "ok"
+        })
+
     }
 }

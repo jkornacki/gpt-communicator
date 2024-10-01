@@ -1,45 +1,54 @@
 <template>
-  <div class="flex flex-col h-screen" style="width: 100vh !important; border-radius: 15px;">
-    <!-- Header -->
-    <header class="bg-gray-100 p-4 border-b">
-      <h1 class="text-2xl font-bold text-center text-red-300">GPT DEMO</h1>
-    </header>
 
-    <!-- Main content area -->
-    <div class="flex flex-1 overflow-hidden">
-      <nav class="w-64 bg-gray-100 p-4 border-r">
-        <router-link class="text-blue-600 text-2xl dark:text-blue-500 hover:underline" to="/">New Chat</router-link>
-        <h2 class="text-2xl text-black">Conversations:</h2>
-        <div v-for="conversation in conversations" :key="conversation.id">
-          <Conversations :link="conversation.link" :title="conversation.title" :isCurrentConversation="conversation.isCurrentConversation"/>
-        </div>
-      </nav>
+  <div class="w-full h-screen">
 
-      <main class="flex-1 flex flex-col overflow-hidden bg-white">
-        <div class="flex-1 p-4 overflow-y-auto" id="chat-content">
+    <div class="flex flex-col h-screen w-full">
+      <!-- Header -->
+      <header class="bg-gray-100 p-4 border-b">
+        <h1 class="text-2xl font-bold text-center text-green-900">GPT DEMO</h1>
+      </header>
 
-          <div v-for="item in conversationItems" :key="item.id">
-            <ConversationItem :item-id="item.id" :html-to-render="item.htmlToRender" :send-by="item.sendBy"/>
+      <!-- Main content area -->
+      <div class="flex flex-1 overflow-hidden">
+        <nav class="w-80 bg-gray-200 p-4 border-r">
+          <router-link class="text-green-500 text-2xl dark:text-blue-500 hover:underline" to="/">New Chat</router-link>
+          <h2 class="text-2xl text-black">Conversations:</h2>
+          <div v-for="conversation in conversations" :key="conversation.id">
+            <Conversations
+                :itemId="conversation.id"
+                :link="conversation.link"
+                :title="conversation.title"
+                :isCurrentConversation="conversation.isCurrentConversation"
+            />
           </div>
+        </nav>
 
+        <main class="flex-1 flex flex-col overflow-hidden bg-white">
+          <div class="flex-1 p-4 overflow-y-auto w-full" id="chat-content">
 
-        </div>
+            <div v-for="item in conversationItems" :key="item.id">
+              <ConversationItem :item-id="item.id" :html-to-render="item.htmlToRender" :send-by="item.sendBy"/>
+            </div>
 
-        <footer class="bg-gray-100 p-4 border-t flex justify-center items-center" style=" overflow: scroll !important;">
-          <div class="text-black w-full h-80">
-            <h3 class="font-bold text-lg">Prompt</h3>
-            <textarea id="prompt-ta" class="border rounded-2xl w-full h-3/4 p-3 text-xl"/>
-            <button
-                v-if="!isSendBtnDisable"
-                :disabled="isSendBtnDisable"
-                @click="handleSend()"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
-            </button>
 
           </div>
 
-        </footer>
-      </main>
+          <footer class="bg-gray-100 p-4 border-t flex justify-center items-center" style=" overflow: scroll !important;">
+            <div class="text-black w-full h-80">
+              <h3 class="font-bold text-lg">Prompt</h3>
+              <textarea id="prompt-ta" class="border rounded-2xl w-full h-3/4 p-3 text-xl"/>
+              <button
+                  v-if="!isSendBtnDisable"
+                  :disabled="isSendBtnDisable"
+                  @click="handleSend()"
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
+              </button>
+
+            </div>
+
+          </footer>
+        </main>
+      </div>
     </div>
   </div>
 </template>
@@ -108,7 +117,12 @@ export default defineComponent({
           })
 
           if (conversationId.value === undefined) {
-            conversations.value.push({id: responseConversationId, link: `/conversations/${responseConversationId}`, title: responseConversationTitle, isCurrentConversation: true})
+            conversations.value.push({
+              id: responseConversationId,
+              link: `/conversations/${responseConversationId}`,
+              title: responseConversationTitle,
+              isCurrentConversation: true
+            })
             router.push(`/conversations/${responseConversationId}`);
           }
 

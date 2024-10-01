@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.apps.gptdemo.gptdemo.conversations.ConversationService;
 
@@ -32,6 +33,15 @@ public class GptRestController {
     ConversationWithItemsApiResponse fetchConversationWithItems(@PathVariable("id") Long conversationId) {
         return conversationService.fetchConversationWithItems(conversationId);
     }
+
+    @PostMapping("/api/conversation/{id}/title")
+    void editConversationTitle(
+            @PathVariable("id") Long conversationId,
+            @RequestParam("title") String newTitle
+    ) {
+        conversationService.editConversationTitle(conversationId, newTitle);
+    }
+
 
     @PostMapping("/api/anthropic")
     PromptApiResponse callAnthropicApi(@RequestBody ApiRequest request) {
