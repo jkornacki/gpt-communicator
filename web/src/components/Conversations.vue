@@ -1,15 +1,17 @@
 <template>
-  <div class="conversations font-extrabold text-black text-lg">
+  <div class="conversations font-extrabold text-black text-lg bg-zinc-700">
     <div v-if="!isTitleEdited">
-      <span v-if="!isCurrentConversation">
-      - <router-link class="text-blue-950 dark:text-blue-500 hover:underline" :to="link" v-if="!isCurrentConversation">{{ currentTitle }}</router-link>
+      <span v-if="!isCurrentConversation" class="text-amber-100 font-bold">
+      - <router-link class="text-blue-700 dark:text-blue-100 font-bold hover:underline" :to="link" v-if="!isCurrentConversation">{{
+          currentTitle
+        }}</router-link>
        </span>
-      <span v-if="isCurrentConversation">
-      - <router-link class="dark:text-red-700 hover:underline bg-emerald-100" :to="link" v-if="isCurrentConversation">{{ currentTitle }}</router-link>
-      </span>
-      <button class="bg-blue-500 text-white py-1 px-1 rounded ml-2" @click="editTitleClick">
+      <span v-if="isCurrentConversation" class="text-amber-100 font-bold">
+      - <router-link class="dark:text-red-500 hover:underline font-bold" :to="link" v-if="isCurrentConversation">{{ currentTitle }}</router-link>
+      <button class="bg-blue-600 text-white py-1 px-1 rounded ml-2" @click="editTitleClick">
         <font-awesome-icon icon="fa-solid fa-pen"/>
       </button>
+      </span>
     </div>
 
     <div v-if="isTitleEdited">

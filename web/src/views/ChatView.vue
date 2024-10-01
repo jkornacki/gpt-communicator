@@ -4,15 +4,15 @@
 
     <div class="flex flex-col h-screen w-full">
       <!-- Header -->
-      <header class="bg-gray-100 p-4 border-b">
-        <h1 class="text-2xl font-bold text-center text-green-900">GPT DEMO</h1>
+      <header class="bg-zinc-700 p-4 border-b">
+        <h1 class="text-2xl font-bold text-center text-amber-300">GPT DEMO</h1>
       </header>
 
       <!-- Main content area -->
       <div class="flex flex-1 overflow-hidden">
-        <nav class="w-80 bg-gray-200 p-4 border-r">
-          <router-link class="text-green-500 text-2xl dark:text-blue-500 hover:underline" to="/">New Chat</router-link>
-          <h2 class="text-2xl text-black">Conversations:</h2>
+        <nav class="w-80 bg-zinc-700 p-4 border-r">
+          <router-link class="font-bold text-2xl dark:text-amber-300 text-amber-300 hover:underline" to="/">New Chat</router-link>
+          <h2 class="text-2xl text-amber-100">Conversations:</h2>
           <div v-for="conversation in conversations" :key="conversation.id">
             <Conversations
                 :itemId="conversation.id"
@@ -23,8 +23,8 @@
           </div>
         </nav>
 
-        <main class="flex-1 flex flex-col overflow-hidden bg-white">
-          <div class="flex-1 p-4 overflow-y-auto w-full" id="chat-content">
+        <main class="flex-1 flex flex-col overflow-hidden bg-zinc-700">
+          <div class="flex-1 p-4 overflow-y-auto w-full bg-white" id="chat-content">
 
             <div v-for="item in conversationItems" :key="item.id">
               <ConversationItem :item-id="item.id" :html-to-render="item.htmlToRender" :send-by="item.sendBy"/>
@@ -36,7 +36,7 @@
           <footer class="bg-gray-100 p-4 border-t flex justify-center items-center" style=" overflow: scroll !important;">
             <div class="text-black w-full h-80">
               <h3 class="font-bold text-lg">Prompt</h3>
-              <textarea id="prompt-ta" class="border rounded-2xl w-full h-3/4 p-3 text-xl"/>
+              <textarea id="prompt-ta" class="block p-2.5 w-full h-64 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt ....."/>
               <button
                   v-if="!isSendBtnDisable"
                   :disabled="isSendBtnDisable"
