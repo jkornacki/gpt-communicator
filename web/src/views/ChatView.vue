@@ -4,15 +4,15 @@
 
     <div class="flex flex-col h-screen w-full">
       <!-- Header -->
-      <header class="bg-zinc-700 p-4 border-b">
+      <header class="bg-zinc-700 p-4">
         <h1 class="text-2xl font-bold text-center text-amber-300">GPT DEMO</h1>
       </header>
 
       <!-- Main content area -->
       <div class="flex flex-1 overflow-hidden">
-        <nav class="w-80 bg-zinc-700 p-4 border-r">
+        <nav class="w-96 bg-zinc-700 p-4 border-zinc-700">
           <router-link class="font-bold text-2xl dark:text-amber-300 text-amber-300 hover:underline" to="/">New Chat</router-link>
-          <h2 class="text-2xl text-amber-100">Conversations:</h2>
+          <h2 class="text-2xl font-extrabold text-amber-100 border-b border-amber-300 pt-3 pb-2">Conversations:</h2>
           <div v-for="conversation in conversations" :key="conversation.id">
             <Conversations
                 :itemId="conversation.id"
