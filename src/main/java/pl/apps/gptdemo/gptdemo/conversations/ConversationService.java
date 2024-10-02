@@ -63,6 +63,7 @@ public class ConversationService {
 
     @Transactional(readOnly = true)
     public ConversationWithItemsApiResponse fetchConversationWithItems(Long conversationId) {
+
         Conversation conversationWithItems = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
@@ -107,7 +108,6 @@ public class ConversationService {
     }
 
     private ChatMemory prepareChatMemoryWithNumberOfUserMessages(Conversation conversation, int numberOfMessageHistory) {
-
 
         List<ConversationItems> items = new ArrayList<>();
 
@@ -173,5 +173,16 @@ public class ConversationService {
         conversation.editTitle(newTitle);
 
         conversationRepositoryPort.saveConversation(conversation);
+    }
+
+    public void deleteConversation(Long conversationId) {
+
+        Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithoutItems(conversationId))
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        conversation.delete();
+
+        conversationRepositoryPort.saveConversation(conversation);
+
     }
 }

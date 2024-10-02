@@ -6,12 +6,20 @@
           currentTitle
         }}</router-link>
        </span>
-      <span v-if="isCurrentConversation" class="text-amber-100 font-bold">
-      - <router-link class="dark:text-red-500 hover:underline font-bold" :to="link" v-if="isCurrentConversation">{{ currentTitle }}</router-link>
-      <button class="bg-blue-600 text-white py-1 px-1 rounded ml-2" @click="editTitleClick">
-        <font-awesome-icon icon="fa-solid fa-pen"/>
-      </button>
-      </span>
+      <div class="flex justify-between items-center" v-if="isCurrentConversation">
+        <span class="text-amber-100 font-bold">
+          - <router-link class="dark:text-red-500 hover:underline font-bold" :to="link" v-if="isCurrentConversation">{{ currentTitle }}</router-link>
+        </span>
+        <div>
+          <button class="bg-blue-600 text-white py-1 px-1 rounded ml-2" @click="editTitleClick">
+            <font-awesome-icon icon="fa-solid fa-pen"/>
+          </button>
+          <button class="bg-red-600 text-white py-1 px-1 rounded ml-2" @click="removeConversationClick">
+            <font-awesome-icon icon="fa-solid fa-trash"/>
+          </button>
+        </div>
+      </div>
+
     </div>
 
     <div v-if="isTitleEdited">
@@ -27,55 +35,70 @@
   </div>
 </template>
 
-<script setup>
-import {defineProps, onMounted, ref} from 'vue'
-import {GptApiService} from "@/services/GptApiService.js";
+<script>
+import {defineComponent, onMounted, ref} from 'vue';
+import {GptApiService} from '@/services/GptApiService.js';
 
-// Definiujemy props
-const props = defineProps({
-  itemId: {
-    type: Number,
-    required: true
+export default defineComponent({
+  props: {
+    itemId: {
+      type: Number,
+      required: true
+    },
+    link: {
+      type: String,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    },
+    isCurrentConversation: {
+      type: Boolean,
+      required: true
+    }
   },
-  link: {
-    type: String,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  isCurrentConversation: {
-    type: Boolean,
-    required: true
+  emits: ['update:conversationRemoved'],
+  setup(props, {emit}) {
+    const isTitleEdited = ref(false);
+    const currentTitle = ref(props.title);
+
+    const editTitleClick = () => {
+      isTitleEdited.value = true;
+    };
+
+    const removeConversationClick = () => {
+      emit('update:conversationRemoved', props.itemId);
+    };
+
+    const saveTitle = () => {
+      isTitleEdited.value = false;
+
+      GptApiService.editConversationTitle(props.itemId, currentTitle.value)
+          .then(value => {
+            console.info(`Conversation ${props.itemId} edited`);
+          })
+          .catch(reason => {
+            console.info(reason);
+            alert('Save title error');
+          });
+    };
+
+    onMounted(() => {
+      // Any mounted logic
+    });
+
+    return {
+      isTitleEdited,
+      currentTitle,
+      editTitleClick,
+      removeConversationClick,
+      saveTitle
+    };
   }
-})
-
-let isTitleEdited = ref(false);
-let currentTitle = ref(props.title);
-
-const editTitleClick = () => {
-  isTitleEdited.value = true;
-}
-
-const saveTitle = () => {
-  isTitleEdited.value = false;
-
-  GptApiService.editConversationTitle(props.itemId, currentTitle.value)
-      .then(value => {
-      })
-      .catch(reason => {
-        console.info(reason);
-        alert("Save title error");
-      })
-}
-
-onMounted(() => {
-
 });
-
-
 </script>
+
 <style scoped>
 .conversations {
   /* Add your styles here */

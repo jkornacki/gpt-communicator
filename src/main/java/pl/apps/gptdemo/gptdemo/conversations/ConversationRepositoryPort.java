@@ -3,6 +3,7 @@ package pl.apps.gptdemo.gptdemo.conversations;
 import java.util.List;
 
 public interface ConversationRepositoryPort {
+
     Conversation saveConversation(Conversation conversation);
 
     List<Conversation> findAll();
@@ -10,4 +11,5 @@ public interface ConversationRepositoryPort {
     Conversation getConversationWithItems(Long conversationId);
 
     Conversation getConversationWithoutItems(Long conversationId);
+
 }

@@ -1,8 +1,10 @@
 package pl.apps.gptdemo.gptdemo.conversations;
 
+import jakarta.persistence.Column;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +14,15 @@ public class Conversation {
 
     private Long id;
     private String title;
+    private LocalDateTime createDate;
+    private LocalDateTime deleteDate;
     private List<ConversationItems> items;
 
     public static Conversation createNew(String prompt, String promptResponse, String suggestedTitle) {
         return Conversation.builder()
                 .title(suggestedTitle)
+                .createDate(LocalDateTime.now())
+                .deleteDate(null)
                 .items(List.of(
                         ConversationItems.createNew(prompt, null, SendBy.USER),
                         ConversationItems.createNew(prompt, promptResponse, SendBy.GPT)
@@ -50,5 +56,9 @@ public class Conversation {
 
     public void editTitle(String newTitle) {
         this.title = newTitle;
+    }
+
+    public void delete() {
+        this.deleteDate = LocalDateTime.now();
     }
 }

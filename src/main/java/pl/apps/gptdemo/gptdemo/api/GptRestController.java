@@ -3,6 +3,7 @@ package pl.apps.gptdemo.gptdemo.api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +52,11 @@ public class GptRestController {
     @PostMapping("/api/conversation/{id}/anthropic")
     PromptApiResponse callAnthropicApiInConversation(@PathVariable("id") Long conversationId, @RequestBody ApiRequest request) {
         return handleCallAnthropicApi(() -> conversationService.sendPromptForExistingConversation(conversationId, request.prompt()), request.prompt());
+    }
+
+    @DeleteMapping("/api/conversation/{id}")
+    void deleteConversation(@PathVariable("id") Long conversationId) {
+        conversationService.deleteConversation(conversationId);
     }
 
     private PromptApiResponse handleCallAnthropicApi(Supplier<PromptApiResponse> apiCall, String prompt) {

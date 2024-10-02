@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -33,6 +34,12 @@ class ConversationEntity {
 
     @Column(name = "title")
     private String title;
+
+    @Column(name = "create_date")
+    private LocalDateTime createDate;
+
+    @Column(name = "deleted_date")
+    private LocalDateTime deleteDate;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ConversationItemsEntity> items;

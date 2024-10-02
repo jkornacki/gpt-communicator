@@ -81,4 +81,21 @@ export class GptApiService {
         })
 
     }
+
+
+    static async deleteConversation(conversationId) {
+
+        return await fetch(`${API_URL}/api/conversation/${conversationId}`, {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.status !== 200) {
+                return Promise.reject("error");
+            }
+            return "ok"
+        })
+
+    }
 }

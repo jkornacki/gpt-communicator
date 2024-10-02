@@ -18,6 +18,7 @@ class ConversationRepositoryAdapter implements ConversationRepositoryPort {
 
     @Override
     public Conversation saveConversation(Conversation conversation) {
+
         ConversationEntity conversationEntity = conversationRepositoryMapper.mapToConversationEntity(conversation);
 
         List<ConversationItems> conversationItems = null;
@@ -40,7 +41,7 @@ class ConversationRepositoryAdapter implements ConversationRepositoryPort {
 
     @Override
     public List<Conversation> findAll() {
-        return conversationJpaRepository.findAll()
+        return conversationJpaRepository.findAllNotDeleted()
                 .stream()
                 .map(conversationRepositoryMapper::mapToConversationWithoutItems)
                 .toList();
@@ -50,6 +51,7 @@ class ConversationRepositoryAdapter implements ConversationRepositoryPort {
     @Override
     public Conversation getConversationWithItems(Long conversationId) {
         return conversationJpaRepository.findById(conversationId)
+                .filter(conversationEntity -> conversationEntity.getDeleteDate() == null)
                 .map(conversationRepositoryMapper::mapToConversation)
                 .orElse(Conversation.empty());
     }
@@ -57,6 +59,7 @@ class ConversationRepositoryAdapter implements ConversationRepositoryPort {
     @Override
     public Conversation getConversationWithoutItems(Long conversationId) {
         return conversationJpaRepository.findById(conversationId)
+                .filter(conversationEntity -> conversationEntity.getDeleteDate() == null)
                 .map(conversationRepositoryMapper::mapToConversationWithoutItems)
                 .orElse(Conversation.empty());
     }

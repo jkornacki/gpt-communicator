@@ -19,6 +19,7 @@
                 :link="conversation.link"
                 :title="conversation.title"
                 :isCurrentConversation="conversation.isCurrentConversation"
+                @update:conversationRemoved="removeConversationById($event)"
             />
           </div>
         </nav>
@@ -83,6 +84,23 @@ export default defineComponent({
         });
       }
     };
+
+    const removeConversationById = (conversationId) => {
+
+      let text = "Remove conversation ?";
+      if (confirm(text) === true) {
+        GptApiService.deleteConversation(conversationId)
+            .then(ignore => {
+              console.info(`Conversation ${conversationId} mark as deleted`);
+              conversations.value = conversations.value = conversations.value.filter(conversation => conversation.id !== conversationId);
+              router.push(`/`);
+            })
+            .catch(reason => {
+              console.info(reason);
+              alert("Delete conversation error");
+            })
+      }
+    }
 
     const handleSend = () => {
       const textarea = document.getElementById('prompt-ta');
@@ -218,7 +236,8 @@ export default defineComponent({
       conversations,
       conversationItems,
       handleSend,
-      conversationId
+      conversationId,
+      removeConversationById
     };
   }
 });
