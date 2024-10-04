@@ -1,8 +1,5 @@
 package pl.apps.gptdemo.gptdemo.conversations;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,12 +11,10 @@ import pl.apps.gptdemo.gptdemo.api.ConversationWithItemsApiResponse;
 import pl.apps.gptdemo.gptdemo.api.PromptApiResponse;
 import pl.apps.gptdemo.gptdemo.gpt_client.GptApiClient;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -86,7 +81,8 @@ public class ConversationService {
         Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
-        ChatMemory chatMemory = prepareChatMemoryWithNumberOfUserMessages(conversation, configuration.getDefaultNumberOfMessageHistory());
+        ChatMemory chatMemory = new ConversationItemChatMemory(configuration.getAnthropicSystemPrompt(),
+                conversation, configuration.getDefaultNumberOfMessageHistory());
 
         var promptApiResponse = gptApiClient.sendMessage(prompt, chatMemory);
 
@@ -105,64 +101,6 @@ public class ConversationService {
                         ).orElse(null)
         );
 
-    }
-
-    private ChatMemory prepareChatMemoryWithNumberOfUserMessages(Conversation conversation, int numberOfMessageHistory) {
-
-        List<ConversationItems> items = new ArrayList<>();
-
-        var orderedItems = conversation.getItems().stream()
-                .sorted(Comparator.comparing(ConversationItems::getCreatedAt).reversed())
-                .toList();
-
-        int currentIndex = 0;
-        for (ConversationItems conversationItems : orderedItems) {
-
-            if (currentIndex > numberOfMessageHistory) {
-                break;
-            }
-
-            items.add(conversationItems);
-
-            if (conversationItems.isUserPrompt()) {
-                currentIndex++;
-            }
-
-        }
-
-        var chatMessages = items.stream()
-                .map(this::convertToChatMessage)
-                .collect(Collectors.toCollection(ArrayList::new));
-
-
-        return new ChatMemory() {
-            @Override
-            public Object id() {
-                return "default";
-            }
-
-            @Override
-            public void add(ChatMessage chatMessage) {
-                chatMessages.add(chatMessage);
-            }
-
-            @Override
-            public List<ChatMessage> messages() {
-                return chatMessages;
-            }
-
-            @Override
-            public void clear() {
-                chatMessages.clear();
-            }
-        };
-    }
-
-    private ChatMessage convertToChatMessage(ConversationItems conversationItems) {
-        if (conversationItems.isUserPrompt()) {
-            return UserMessage.from(conversationItems.getPrompt());
-        }
-        return AiMessage.from(conversationItems.getContent());
     }
 
     @Transactional

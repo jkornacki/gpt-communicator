@@ -124,14 +124,18 @@ export default defineComponent({
 
           const items = response.items;
           items.forEach(item => {
-            conversationItems.value.push(
-                {
-                  id: item.id,
-                  sendBy: item.sendBy,
-                  htmlToRender: item.sendBy === "USER" ? item.prompt : item.content,
-                  createdAt: item.createdAt
-                }
-            )
+
+            if (!conversationItems.value.some(existingItem => existingItem.id === item.id)) {
+              conversationItems.value.push(
+                  {
+                    id: item.id,
+                    sendBy: item.sendBy,
+                    htmlToRender: item.sendBy === "USER" ? item.prompt : item.content,
+                    createdAt: item.createdAt
+                  }
+              )
+            }
+
           })
 
           if (conversationId.value === undefined) {

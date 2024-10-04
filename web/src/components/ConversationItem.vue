@@ -1,7 +1,10 @@
 <template>
   <div class="mt-1 text-black mb-4" style="border-top: solid black 1px;">
     <div v-if="sendBy === 'USER'">
-      <h5 class="text-2xl text-black" style="border-bottom: 1px dotted #d1d1d1; padding: 1em 0" v-html="displayedHtml"></h5>
+      <span class="text-2xl text-black" style="border-bottom: 1px dotted #d1d1d1; padding: 1em 0">
+        <h5 v-html="displayedHtml"></h5>
+      </span>
+
       <button v-if="shouldHidePrompt" @click="toggleShowFullContent">{{ showFullContent ? 'Show Less' : 'Show More' }}</button>
     </div>
     <div class="response text-xl font-bold text-black" v-if="sendBy === 'GPT'" v-html="processedHtml">
@@ -10,7 +13,7 @@
 </template>
 
 <script setup>
-import {defineProps, onMounted, ref, computed } from 'vue'
+import {computed, defineProps, onMounted, ref} from 'vue'
 import hljs from 'highlight.js'
 import ClipboardJS from 'clipboard'
 import showdown from "showdown";
@@ -67,8 +70,8 @@ const toggleShowFullContent = () => {
 // Funkcja do przetwarzania HTML
 const processHtml = (html) => {
 
-  if(props.sendBy === 'USER') {
-    return processPromptHtml(html);
+  if (props.sendBy === 'USER') {
+    return ">> " + processPromptHtml(html);
   }
 
   const converter = new showdown.Converter();

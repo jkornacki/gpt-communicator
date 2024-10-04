@@ -61,7 +61,7 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
                 .logResponses(true)
                 .build();
         if (skipSSL) {
-            var apiUrl = "https://api.anthropic.com/v1/";
+            var apiUrl = ANTHROPIC_BASE_USR;
             var insecureOkHttpClient = createInsecureOkHttpClient(proxyHost, proxyPort);
             var client = DefaultAnthropicClient.builder()
                     .baseUrl(apiUrl)
