@@ -32,7 +32,7 @@ import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 @CrossOrigin(originPatterns = "*")
 class AnthropicLangChain4jApiClient implements GptApiClient {
 
-    private static final String ANTHROPIC_BASE_USR = "https://api.anthropic.com/v1/messages";
+    private static final String ANTHROPIC_BASE_USR = "https://api.anthropic.com/v1/messages/";
 
     private final ChatLanguageModel model;
     private final GptConfiguration configuration;
