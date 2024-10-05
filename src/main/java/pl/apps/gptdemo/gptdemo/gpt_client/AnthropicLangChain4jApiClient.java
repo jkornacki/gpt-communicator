@@ -32,7 +32,7 @@ import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 @CrossOrigin(originPatterns = "*")
 class AnthropicLangChain4jApiClient implements GptApiClient {
 
-    private static final String ANTHROPIC_BASE_USR = "https://api.anthropic.com/v1/messages/";
+    private static final String ANTHROPIC_BASE_USR = "https://api.anthropic.com/v1/";
 
     private final ChatLanguageModel model;
     private final GptConfiguration configuration;
@@ -156,13 +156,16 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
             final SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 
+            var builder = new OkHttpClient.Builder();
             // Konfiguracja proxy
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+            if(proxyHost != null && !proxyHost.isBlank() && proxyPort != null && !proxyPort.isBlank()) {
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+                builder.proxy(proxy);
+            }
 
-            return new OkHttpClient.Builder()
+            return builder
                     .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
                     .hostnameVerifier((hostname, session) -> true)
-                    .proxy(proxy)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);
