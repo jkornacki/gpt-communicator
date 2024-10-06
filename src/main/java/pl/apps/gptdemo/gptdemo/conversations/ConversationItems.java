@@ -15,12 +15,12 @@ public class ConversationItems {
     private String content;
     private LocalDateTime createdAt;
 
-    public static ConversationItems createNew(String prompt, String promptResponse, SendBy sendBy) {
+    public static ConversationItems createNew(String prompt, String promptResponse, SendBy sendBy, LocalDateTime sendPromptDate) {
         return ConversationItems.builder()
                 .sendBy(sendBy)
                 .prompt(prompt)
                 .content(promptResponse)
-                .createdAt(LocalDateTime.now())
+                .createdAt(sendPromptDate)
                 .build();
     }
 

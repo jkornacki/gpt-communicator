@@ -21,7 +21,7 @@ public class ConversationItemChatMemory implements ChatMemory {
         List<ConversationItems> items = new ArrayList<>();
 
         var orderedItems = conversation.getItems().stream()
-                .sorted(Comparator.comparing(ConversationItems::getCreatedAt).reversed())
+                .sorted(Comparator.comparing(ConversationItems::getCreatedAt))
                 .toList();
 
         int currentIndex = 0;

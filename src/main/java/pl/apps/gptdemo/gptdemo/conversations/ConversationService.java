@@ -11,6 +11,7 @@ import pl.apps.gptdemo.gptdemo.api.ConversationWithItemsApiResponse;
 import pl.apps.gptdemo.gptdemo.api.PromptApiResponse;
 import pl.apps.gptdemo.gptdemo.gpt_client.GptApiClient;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -28,11 +29,12 @@ public class ConversationService {
     @Transactional
     public PromptApiResponse sendPromptForNewConversation(String prompt) {
 
+        LocalDateTime sendPromptDate = LocalDateTime.now();
         String promptResponse = gptApiClient.sendMessage(prompt);
 
         var titleResponse = gptApiClient.sendTitleGenerationMessage(promptResponse);
 
-        Conversation conversation = Conversation.createNew(prompt, promptResponse, titleResponse);
+        Conversation conversation = Conversation.createNew(prompt, sendPromptDate, promptResponse, titleResponse);
         Conversation savedConversation = conversationRepositoryPort.saveConversation(conversation);
 
         return new PromptApiResponse(
@@ -62,7 +64,6 @@ public class ConversationService {
         Conversation conversationWithItems = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
-
         List<ConversationItemDto> items;
         if (conversationWithItems.getItems() != null && !conversationWithItems.getItems().isEmpty()) {
             items = conversationWithItems.getItems().stream()
@@ -78,6 +79,7 @@ public class ConversationService {
     @Transactional
     public PromptApiResponse sendPromptForExistingConversation(Long conversationId, String prompt) {
 
+        LocalDateTime sendPrompt = LocalDateTime.now();
         Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
@@ -86,7 +88,7 @@ public class ConversationService {
 
         var promptApiResponse = gptApiClient.sendMessage(prompt, chatMemory);
 
-        conversation.addItem(prompt, promptApiResponse);
+        conversation.addItem(prompt, sendPrompt, promptApiResponse);
 
         Conversation savedConversation = conversationRepositoryPort.saveConversation(conversation);
 
