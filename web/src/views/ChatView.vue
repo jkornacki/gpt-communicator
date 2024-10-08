@@ -5,7 +5,7 @@
     <div class="flex flex-col h-screen w-full">
       <!-- Header -->
       <header class="bg-zinc-700 p-4">
-        <h1 class="text-2xl font-bold text-center text-amber-300">GPT DEMO</h1>
+        <h1 class="text-2xl font-bold text-center text-amber-300">GPT Communicator</h1>
       </header>
 
       <!-- Main content area -->

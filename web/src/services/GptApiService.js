@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:7070";
+const API_URL = window.location.origin;
 
 export class GptApiService {
 

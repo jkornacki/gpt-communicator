@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: gpt-communicator
+    ports:
+      - "7070:7070"
+      - "7180:7180"
+    volumes:
+      - ./logs:/app/logs
+      - ./db:/app/db
+    environment:
+      - TZ=Europe/Warsaw
+      - ANTHROPIC_APIKEY=${ANTHROPIC_APIKEY}

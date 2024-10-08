@@ -37,4 +37,5 @@ web/node
 src/main/resources/static/dist
 data.sb.*
 gpt-demo.jar
+.env
 
