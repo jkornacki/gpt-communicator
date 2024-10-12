@@ -59,16 +59,18 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
                 .modelName(AnthropicChatModelName.CLAUDE_3_5_SONNET_20240620)
                 .logRequests(true)
                 .logResponses(true)
+                .timeout(Duration.ofSeconds(configuration.getAnthropicTimeoutInSec()))
+                .maxTokens(configuration.getAnthropicMaxTokens())
                 .build();
         if (skipSSL) {
             var apiUrl = ANTHROPIC_BASE_USR;
-            var insecureOkHttpClient = createInsecureOkHttpClient(proxyHost, proxyPort);
+            var insecureOkHttpClient = createInsecureOkHttpClient(proxyHost, proxyPort, configuration.getAnthropicTimeoutInSec());
             var client = DefaultAnthropicClient.builder()
                     .baseUrl(apiUrl)
                     .apiKey(apiKey)
                     .version("2023-06-01")
                     .beta("tools-2024-04-04")
-                    .timeout(Duration.ofSeconds(20))
+                    .timeout(Duration.ofSeconds(configuration.getAnthropicTimeoutInSec()))
                     .logRequests(true)
                     .logResponses(true)
                     .build();
@@ -134,7 +136,8 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
     }
 
     private static OkHttpClient createInsecureOkHttpClient(String proxyHost,
-                                                           String proxyPort) {
+                                                           String proxyPort,
+                                                           int anthropicTimeoutInSec) {
         try {
             final TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
@@ -162,6 +165,9 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
                 builder.proxy(proxy);
             }
+
+            builder.callTimeout(Duration.ofSeconds(anthropicTimeoutInSec));
+            builder.readTimeout(Duration.ofSeconds(anthropicTimeoutInSec));
 
             return builder
                     .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])

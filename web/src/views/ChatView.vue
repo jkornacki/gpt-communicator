@@ -35,16 +35,27 @@
           </div>
 
           <footer class="bg-gray-100 p-4 border-t flex justify-center items-center" style=" overflow: scroll !important;">
-            <div class="text-black w-full h-80">
+            <div :class="footerClass">
               <h3 class="font-bold text-lg">Prompt</h3>
-              <textarea id="prompt-ta" class="block p-2.5 w-full h-64 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Prompt ....."/>
+              <textarea id="prompt-ta" :class="promptTextClass" placeholder="Prompt ....."/>
               <button
                   v-if="!isSendBtnDisable"
                   :disabled="isSendBtnDisable"
                   @click="handleSend()"
                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
               </button>
-
+              <button
+                  v-if="isPromptHide"
+                  @click="toggleFooterHeight"
+                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1">
+                <font-awesome-icon icon="fa-solid fa-arrow-up" />
+              </button>
+              <button
+                  v-if="!isPromptHide"
+                  @click="toggleFooterHeight"
+                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1">
+                <font-awesome-icon icon="fa-solid fa-arrow-down" />
+              </button>
             </div>
 
           </footer>
@@ -56,7 +67,7 @@
 
 <script>
 
-import {defineComponent, onMounted, ref, watch, nextTick} from 'vue';
+import {defineComponent, nextTick, onMounted, ref, watch} from 'vue';
 import {GptApiService} from "@/services/GptApiService.js";
 import Conversations from "@/components/Conversations.vue";
 import {useRoute, useRouter} from "vue-router";
@@ -234,6 +245,20 @@ export default defineComponent({
       }
     });
 
+    const isPromptHide = ref(false);
+    const footerClass = ref('text-black w-full h-80');
+    const promptTextClass = ref('block p-2.5 w-full h-64 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
+    const toggleFooterHeight = () => {
+
+      if (isPromptHide.value) {
+        footerClass.value = 'text-black w-full h-80'
+        promptTextClass.value = 'block p-2.5 w-full h-64 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+      } else {
+        footerClass.value = 'text-black w-full h-24'
+        promptTextClass.value = 'block p-2.5 w-full h-11 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+      }
+      isPromptHide.value = !isPromptHide.value
+    };
 
     return {
       isSendBtnDisable,
@@ -241,7 +266,11 @@ export default defineComponent({
       conversationItems,
       handleSend,
       conversationId,
-      removeConversationById
+      removeConversationById,
+      footerClass,
+      promptTextClass,
+      toggleFooterHeight,
+      isPromptHide
     };
   }
 });
