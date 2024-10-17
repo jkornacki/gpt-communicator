@@ -10,7 +10,7 @@
 
       <!-- Main content area -->
       <div class="flex flex-1 overflow-hidden">
-        <nav class="w-96 bg-zinc-700 p-4 border-zinc-700">
+        <nav class="bg-zinc-700 p-4 border-zinc-700" :style="{ width: navWidth }">
           <router-link class="font-bold text-2xl dark:text-amber-300 text-amber-300 hover:underline" to="/">New Chat</router-link>
           <h2 class="text-2xl font-extrabold text-amber-100 border-b border-amber-300 pt-3 pb-2">Conversations:</h2>
           <div v-for="conversation in conversations" :key="conversation.id">
@@ -24,6 +24,7 @@
           </div>
         </nav>
 
+        <div class="resizer" @mousedown="startResize"></div>
         <main class="flex-1 flex flex-col overflow-hidden bg-zinc-700">
           <div class="flex-1 p-4 overflow-y-auto w-full bg-white" id="chat-content">
 
@@ -34,28 +35,29 @@
 
           </div>
 
-          <footer class="bg-gray-100 p-4 border-t flex justify-center items-center" style=" overflow: scroll !important;">
+          <footer class="bg-gray-100 p-4 border-t flex justify-center items-center " style=" overflow: scroll !important;">
             <div :class="footerClass">
               <h3 class="font-bold text-lg">Prompt</h3>
               <textarea id="prompt-ta" :class="promptTextClass" placeholder="Prompt ....."/>
-              <button
-                  v-if="!isSendBtnDisable"
-                  :disabled="isSendBtnDisable"
-                  @click="handleSend()"
-                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
-              </button>
-              <button
-                  v-if="isPromptHide"
-                  @click="toggleFooterHeight"
-                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1">
-                <font-awesome-icon icon="fa-solid fa-arrow-up" />
-              </button>
-              <button
-                  v-if="!isPromptHide"
-                  @click="toggleFooterHeight"
-                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1">
-                <font-awesome-icon icon="fa-solid fa-arrow-down" />
-              </button>
+
+              <div class="mt-1 mb-1">
+                <button
+                    v-if="!isSendBtnDisable"
+                    :disabled="isSendBtnDisable"
+                    @click="handleSend()"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
+                </button>
+
+                <button
+                    @click="toggleFooterHeight"
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1">
+                  <font-awesome-icon v-if="isPromptHide" icon="fa-solid fa-arrow-down"/>
+                  <font-awesome-icon  v-if="!isPromptHide" icon="fa-solid fa-arrow-up"/>
+                </button>
+
+              </div>
+
+
             </div>
 
           </footer>
@@ -260,6 +262,28 @@ export default defineComponent({
       isPromptHide.value = !isPromptHide.value
     };
 
+    // Odczytanie szerokości z localStorage lub ustawienie wartości domyślnej
+    const savedNavWidth = localStorage.getItem('navWidth') || '24rem';
+    const navWidth = ref(savedNavWidth); // Initial width of nav
+
+    const startResize = (event) => {
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('mouseup', stopResize);
+    };
+
+    const resize = (event) => {
+      const newWidth = event.clientX;
+      if (newWidth > 191 && newWidth < 484) { // 384px = 24rem
+        navWidth.value = `${newWidth}px`;
+      }
+    };
+
+    const stopResize = () => {
+      document.removeEventListener('mousemove', resize);
+      document.removeEventListener('mouseup', stopResize);
+      localStorage.setItem('navWidth', navWidth.value);
+    };
+
     return {
       isSendBtnDisable,
       conversations,
@@ -270,7 +294,9 @@ export default defineComponent({
       footerClass,
       promptTextClass,
       toggleFooterHeight,
-      isPromptHide
+      isPromptHide,
+      navWidth,
+      startResize
     };
   }
 });
@@ -306,5 +332,13 @@ export default defineComponent({
 pre {
   position: relative;
   padding-top: 24px; /* Make space for the button */
+}
+
+.resizer {
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: #333;;
+  //background-color: rgb(252 211 77);
 }
 </style>

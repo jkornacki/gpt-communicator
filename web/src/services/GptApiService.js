@@ -1,4 +1,5 @@
 const API_URL = window.location.origin;
+// const API_URL = "http://localhost:7070";
 
 export class GptApiService {
 
