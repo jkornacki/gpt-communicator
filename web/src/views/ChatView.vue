@@ -4,8 +4,9 @@
 
     <div class="flex flex-col h-screen w-full">
       <!-- Header -->
-      <header class="bg-zinc-700 p-4">
-        <h1 class="text-2xl font-bold text-center text-amber-300">GPT Communicator</h1>
+      <header class="bg-zinc-700 p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-center text-amber-300 flex-grow">GPT Communicator</h1>
+
       </header>
 
       <!-- Main content area -->
@@ -32,13 +33,16 @@
               <ConversationItem :item-id="item.id" :html-to-render="item.htmlToRender" :send-by="item.sendBy"/>
             </div>
 
-
           </div>
 
+          <div class="prompt-resizer" @mousedown="startResizePrompt"></div>
+
           <footer class="bg-gray-100 p-4 border-t flex justify-center items-center " style=" overflow: scroll !important;">
-            <div :class="footerClass">
+            <div class="text-black w-full" :style="{height: promptHeight}">
               <h3 class="font-bold text-lg">Prompt</h3>
-              <textarea id="prompt-ta" :class="promptTextClass" placeholder="Prompt ....."/>
+              <textarea id="prompt-ta"
+                        class="block p-2.5 w-full text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Prompt ....." :style="{ height: promptHeightTA }"/>
 
               <div class="mt-1 mb-1">
                 <button
@@ -46,13 +50,6 @@
                     :disabled="isSendBtnDisable"
                     @click="handleSend()"
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
-                </button>
-
-                <button
-                    @click="toggleFooterHeight"
-                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1">
-                  <font-awesome-icon v-if="isPromptHide" icon="fa-solid fa-arrow-down"/>
-                  <font-awesome-icon  v-if="!isPromptHide" icon="fa-solid fa-arrow-up"/>
                 </button>
 
               </div>
@@ -248,20 +245,6 @@ export default defineComponent({
     });
 
     const isPromptHide = ref(false);
-    const footerClass = ref('text-black w-full h-80');
-    const promptTextClass = ref('block p-2.5 w-full h-64 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
-    const toggleFooterHeight = () => {
-
-      if (isPromptHide.value) {
-        footerClass.value = 'text-black w-full h-80'
-        promptTextClass.value = 'block p-2.5 w-full h-64 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-      } else {
-        footerClass.value = 'text-black w-full h-24'
-        promptTextClass.value = 'block p-2.5 w-full h-11 text-xl text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-      }
-      isPromptHide.value = !isPromptHide.value
-    };
-
     // Odczytanie szerokości z localStorage lub ustawienie wartości domyślnej
     const savedNavWidth = localStorage.getItem('navWidth') || '24rem';
     const navWidth = ref(savedNavWidth); // Initial width of nav
@@ -273,7 +256,7 @@ export default defineComponent({
 
     const resize = (event) => {
       const newWidth = event.clientX;
-      if (newWidth > 191 && newWidth < 484) { // 384px = 24rem
+      if (newWidth > 191 && newWidth < 600) { // 384px = 24rem
         navWidth.value = `${newWidth}px`;
       }
     };
@@ -284,6 +267,32 @@ export default defineComponent({
       localStorage.setItem('navWidth', navWidth.value);
     };
 
+    const promptHeight = ref(localStorage.getItem('promptHeight') || '24rem');
+    const promptHeightTA = ref(localStorage.getItem('promptHeightTA') || '270px');
+
+    const startResizePrompt = (event) => {
+      document.addEventListener('mousemove', resizePrompt);
+      document.addEventListener('mouseup', stopResizePrompt);
+    };
+
+    const resizePrompt = (event) => {
+      const height = self.innerHeight - event.clientY;
+      if (height > 139 && height < 700) {
+        const promptHeightTAVal = height - 80;
+        promptHeight.value = `${height}px`;
+        promptHeightTA.value = `${promptHeightTAVal}px`;
+        // console.log(`Resize Prompt: ${promptHeight.value} promptHeightTAVal: ${promptHeightTA.value}`);
+      }
+
+    };
+    const stopResizePrompt = () => {
+      document.removeEventListener('mousemove', resizePrompt);
+      document.removeEventListener('mouseup', stopResizePrompt);
+      localStorage.setItem('promptHeight', promptHeight.value);
+      localStorage.setItem('promptHeightTA', promptHeightTA.value);
+      console.log(`stopResizePrompt Resize Prompt: ${promptHeight.value} promptHeightTAVal: ${promptHeightTA.value}`);
+    };
+
     return {
       isSendBtnDisable,
       conversations,
@@ -291,12 +300,12 @@ export default defineComponent({
       handleSend,
       conversationId,
       removeConversationById,
-      footerClass,
-      promptTextClass,
-      toggleFooterHeight,
       isPromptHide,
       navWidth,
-      startResize
+      startResize,
+      startResizePrompt,
+      promptHeight,
+      promptHeightTA
     };
   }
 });
@@ -335,10 +344,17 @@ pre {
 }
 
 .resizer {
-  width: 5px;
+  width: 4px;
   height: 100%;
   cursor: col-resize;
-  background-color: #333;;
-  //background-color: rgb(252 211 77);
+  //background-color: #333;;
+  background-color: rgb(252, 211, 77, .9);
+}
+
+.prompt-resizer {
+  width: 100%;
+  height: 4px;
+  cursor: row-resize;
+  background-color: rgba(252, 211, 77, .9);
 }
 </style>
