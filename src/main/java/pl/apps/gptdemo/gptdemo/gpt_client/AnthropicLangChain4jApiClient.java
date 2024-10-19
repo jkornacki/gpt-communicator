@@ -26,6 +26,7 @@ import java.net.Proxy;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
@@ -101,17 +102,24 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
     }
 
     @Override
-    public String sendMessage(String prompt) {
+    public String sendMessage(String prompt, String systemPrompt) {
         var singleMessageMemory = prepareEmptyMemory();
-        return sendMessage(prompt, singleMessageMemory);
+        return sendMessage(prompt, singleMessageMemory, systemPrompt);
     }
 
     @Override
-    public String sendMessage(String prompt, ChatMemory chatMemory) {
+    public String sendMessage(String prompt, ChatMemory chatMemory, String systemPrompt) {
+
+        String sysPrompt;
+        if (Objects.isNull(systemPrompt) || systemPrompt.isBlank()) {
+            sysPrompt = configuration.getAnthropicSystemPrompt();
+        } else {
+            sysPrompt = systemPrompt;
+        }
         AiAssistant aiAssistant = AiServices.builder(AiAssistant.class)
                 .chatLanguageModel(model)
                 .chatMemory(chatMemory)
-                .systemMessageProvider(o -> configuration.getAnthropicSystemPrompt())
+                .systemMessageProvider(o -> sysPrompt)
                 .build();
 
         return aiAssistant.chat(prompt);
@@ -161,7 +169,7 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
 
             var builder = new OkHttpClient.Builder();
             // Konfiguracja proxy
-            if(proxyHost != null && !proxyHost.isBlank() && proxyPort != null && !proxyPort.isBlank()) {
+            if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && !proxyPort.isBlank()) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
                 builder.proxy(proxy);
             }

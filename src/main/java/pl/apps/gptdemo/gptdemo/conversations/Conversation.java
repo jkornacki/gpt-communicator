@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Builder
@@ -15,9 +16,10 @@ public class Conversation {
     private String title;
     private LocalDateTime createDate;
     private LocalDateTime deleteDate;
+    private String systemPrompt;
     private List<ConversationItems> items;
 
-    public static Conversation createNew(String prompt, LocalDateTime sendPromptDate, String promptResponse, String suggestedTitle) {
+    public static Conversation createNew(String prompt, LocalDateTime sendPromptDate, String promptResponse, String suggestedTitle, String systemPrompt) {
         return Conversation.builder()
                 .title(suggestedTitle)
                 .createDate(LocalDateTime.now())
@@ -26,6 +28,7 @@ public class Conversation {
                         ConversationItems.createNew(prompt, null, SendBy.USER, sendPromptDate),
                         ConversationItems.createNew(prompt, promptResponse, SendBy.GPT, LocalDateTime.now())
                 ))
+                .systemPrompt(Objects.nonNull(systemPrompt) && !systemPrompt.isBlank() ? systemPrompt : null)
                 .build();
     }
 
@@ -59,5 +62,13 @@ public class Conversation {
 
     public void delete() {
         this.deleteDate = LocalDateTime.now();
+    }
+
+    public void editSystemPrompt(String systemPrompt) {
+        this.systemPrompt = systemPrompt;
+    }
+
+    public void removeConversationSystemPrompt() {
+        this.systemPrompt = null;
     }
 }

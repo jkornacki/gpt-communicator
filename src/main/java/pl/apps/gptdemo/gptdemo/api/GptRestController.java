@@ -43,10 +43,27 @@ public class GptRestController {
         conversationService.editConversationTitle(conversationId, newTitle);
     }
 
+    @PostMapping("/api/conversation/{id}/systemPrompt")
+    void editConversationSystemPrompt(
+            @PathVariable("id") Long conversationId,
+            @RequestParam("systemPrompt") String systemPrompt
+    ) {
+        conversationService.editConversationSystemPrompt(conversationId, systemPrompt);
+    }
+
+    @DeleteMapping("/api/conversation/{id}/systemPrompt")
+    void removeConversationSystemPrompt(
+            @PathVariable("id") Long conversationId
+    ) {
+        conversationService.removeConversationSystemPrompt(conversationId);
+    }
+
 
     @PostMapping("/api/anthropic")
-    PromptApiResponse callAnthropicApi(@RequestBody ApiRequest request) {
-        return handleCallAnthropicApi(() -> conversationService.sendPromptForNewConversation(request.prompt()), request.prompt());
+    PromptApiResponse callAnthropicApi(
+            @RequestBody ApiRequest request,
+            @RequestParam(value = "systemPrompt", required = false) String systemPrompt) {
+        return handleCallAnthropicApi(() -> conversationService.sendPromptForNewConversation(request.prompt(), systemPrompt), request.prompt());
     }
 
     @PostMapping("/api/conversation/{id}/anthropic")

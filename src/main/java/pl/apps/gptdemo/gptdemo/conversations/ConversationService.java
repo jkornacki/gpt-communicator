@@ -27,14 +27,15 @@ public class ConversationService {
     private final GptApiClient gptApiClient;
 
     @Transactional
-    public PromptApiResponse sendPromptForNewConversation(String prompt) {
+    public PromptApiResponse sendPromptForNewConversation(String prompt,
+                                                          String systemPrompt) {
 
         LocalDateTime sendPromptDate = LocalDateTime.now();
-        String promptResponse = gptApiClient.sendMessage(prompt);
+        String promptResponse = gptApiClient.sendMessage(prompt, systemPrompt);
 
         var titleResponse = gptApiClient.sendTitleGenerationMessage(promptResponse);
 
-        Conversation conversation = Conversation.createNew(prompt, sendPromptDate, promptResponse, titleResponse);
+        Conversation conversation = Conversation.createNew(prompt, sendPromptDate, promptResponse, titleResponse, systemPrompt);
         Conversation savedConversation = conversationRepositoryPort.saveConversation(conversation);
 
         return new PromptApiResponse(
@@ -47,6 +48,35 @@ public class ConversationService {
                                 .toList()
                         ).orElse(null)
         );
+    }
+
+    @Transactional
+    public PromptApiResponse sendPromptForExistingConversation(Long conversationId, String prompt) {
+
+        LocalDateTime sendPrompt = LocalDateTime.now();
+        Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        ChatMemory chatMemory = new ConversationItemChatMemory(configuration.getAnthropicSystemPrompt(),
+                conversation, configuration.getDefaultNumberOfMessageHistory());
+
+        var promptApiResponse = gptApiClient.sendMessage(prompt, chatMemory, conversation.getSystemPrompt());
+
+        conversation.addItem(prompt, sendPrompt, promptApiResponse);
+
+        Conversation savedConversation = conversationRepositoryPort.saveConversation(conversation);
+
+        return new PromptApiResponse(
+                savedConversation.getId(),
+                savedConversation.getTitle(),
+                promptApiResponse,
+                Optional.ofNullable(savedConversation.getItems())
+                        .map(conversationItems -> conversationItems.stream()
+                                .map(conversationMapper::mapToConversationWithItemsApiResponseItem)
+                                .toList()
+                        ).orElse(null)
+        );
+
     }
 
     @Transactional(readOnly = true)
@@ -77,36 +107,8 @@ public class ConversationService {
     }
 
     @Transactional
-    public PromptApiResponse sendPromptForExistingConversation(Long conversationId, String prompt) {
-
-        LocalDateTime sendPrompt = LocalDateTime.now();
-        Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
-                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
-
-        ChatMemory chatMemory = new ConversationItemChatMemory(configuration.getAnthropicSystemPrompt(),
-                conversation, configuration.getDefaultNumberOfMessageHistory());
-
-        var promptApiResponse = gptApiClient.sendMessage(prompt, chatMemory);
-
-        conversation.addItem(prompt, sendPrompt, promptApiResponse);
-
-        Conversation savedConversation = conversationRepositoryPort.saveConversation(conversation);
-
-        return new PromptApiResponse(
-                savedConversation.getId(),
-                savedConversation.getTitle(),
-                promptApiResponse,
-                Optional.ofNullable(savedConversation.getItems())
-                        .map(conversationItems -> conversationItems.stream()
-                                .map(conversationMapper::mapToConversationWithItemsApiResponseItem)
-                                .toList()
-                        ).orElse(null)
-        );
-
-    }
-
-    @Transactional
     public void editConversationTitle(Long conversationId, String newTitle) {
+
         Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithoutItems(conversationId))
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
@@ -115,14 +117,36 @@ public class ConversationService {
         conversationRepositoryPort.saveConversation(conversation);
     }
 
+    @Transactional
     public void deleteConversation(Long conversationId) {
 
         Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithoutItems(conversationId))
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
 
         conversation.delete();
-
         conversationRepositoryPort.saveConversation(conversation);
 
+    }
+
+    @Transactional
+    public void editConversationSystemPrompt(Long conversationId, String systemPrompt) {
+
+        Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithoutItems(conversationId))
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        if (systemPrompt == null || systemPrompt.isBlank()) {
+            throw new IllegalArgumentException("systemPrompt is empty");
+        }
+
+        conversation.editSystemPrompt(systemPrompt);
+        conversationRepositoryPort.saveConversation(conversation);
+    }
+
+    public void removeConversationSystemPrompt(Long conversationId) {
+        Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithoutItems(conversationId))
+                .orElseThrow(() -> new ConversationNotFoundException(conversationId));
+
+        conversation.removeConversationSystemPrompt();
+        conversationRepositoryPort.saveConversation(conversation);
     }
 }

@@ -41,6 +41,10 @@ class ConversationEntity {
     @Column(name = "deleted_date")
     private LocalDateTime deleteDate;
 
+    @Column(name = "system_prompt")
+    private String systemPrompt;
+
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ConversationItemsEntity> items;
+
 }

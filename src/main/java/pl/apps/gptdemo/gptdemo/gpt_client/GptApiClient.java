@@ -7,9 +7,9 @@ public interface GptApiClient {
 
     String sendSimpleMessage(ChatMessage... messages);
 
-    String sendMessage(String prompt);
+    String sendMessage(String prompt, ChatMemory chatMemory, String systemPrompt);
 
-    String sendMessage(String prompt, ChatMemory chatMemory);
+    String sendMessage(String prompt, String systemPrompt);
 
     String sendTitleGenerationMessage(String prompt);
 }
