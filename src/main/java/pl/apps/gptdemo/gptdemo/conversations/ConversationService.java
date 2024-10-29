@@ -9,9 +9,11 @@ import pl.apps.gptdemo.gptdemo.api.ConversationApiResponse;
 import pl.apps.gptdemo.gptdemo.api.ConversationItemDto;
 import pl.apps.gptdemo.gptdemo.api.ConversationWithItemsApiResponse;
 import pl.apps.gptdemo.gptdemo.api.PromptApiResponse;
+import pl.apps.gptdemo.gptdemo.api.SystemPromptDto;
 import pl.apps.gptdemo.gptdemo.gpt_client.GptApiClient;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -51,7 +53,7 @@ public class ConversationService {
     }
 
     @Transactional
-    public PromptApiResponse sendPromptForExistingConversation(Long conversationId, String prompt) {
+    public PromptApiResponse sendPromptForExistingConversation(Long conversationId, String prompt, String systemPrompt) {
 
         LocalDateTime sendPrompt = LocalDateTime.now();
         Conversation conversation = Optional.ofNullable(conversationRepositoryPort.getConversationWithItems(conversationId))
@@ -60,7 +62,11 @@ public class ConversationService {
         ChatMemory chatMemory = new ConversationItemChatMemory(configuration.getAnthropicSystemPrompt(),
                 conversation, configuration.getDefaultNumberOfMessageHistory());
 
-        var promptApiResponse = gptApiClient.sendMessage(prompt, chatMemory, conversation.getSystemPrompt());
+        var systemPromptToSend = conversation.getSystemPrompt();
+        if(systemPrompt != null && !systemPrompt.isBlank()) {
+            systemPromptToSend = systemPrompt;
+        }
+        var promptApiResponse = gptApiClient.sendMessage(prompt, chatMemory, systemPromptToSend);
 
         conversation.addItem(prompt, sendPrompt, promptApiResponse);
 
@@ -148,5 +154,30 @@ public class ConversationService {
 
         conversation.removeConversationSystemPrompt();
         conversationRepositoryPort.saveConversation(conversation);
+    }
+
+    public List<SystemPromptDto> getSystemPrompts(Long conversationId) {
+        List<SystemPromptDto> result = prepareWithDefaultSystemPrompt(configuration.getAnthropicSystemPrompt());
+
+        List<SystemPrompt> conversationsSystemPrompts = conversationRepositoryPort.findSystemPromptsForAllConversations();
+        conversationsSystemPrompts.stream()
+                .map(systemPrompt -> SystemPromptDto.builder()
+                        .isCurrentConversationsPrompt(systemPrompt.conversationId().equals(conversationId))
+                        .isSystemPrompt(false)
+                        .conversationId(systemPrompt.conversationId())
+                        .prompt(systemPrompt.prompt())
+                        .build())
+                .forEach(result::add);
+        return result;
+    }
+
+    private List<SystemPromptDto> prepareWithDefaultSystemPrompt(String anthropicSystemPrompt) {
+        var systemPrompts = new ArrayList<SystemPromptDto>();
+        systemPrompts.add(SystemPromptDto.builder()
+                .conversationId(null)
+                .prompt(anthropicSystemPrompt)
+                .isSystemPrompt(true)
+                .build());
+        return systemPrompts;
     }
 }

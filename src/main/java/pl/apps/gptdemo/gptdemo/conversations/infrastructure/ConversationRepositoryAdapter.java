@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pl.apps.gptdemo.gptdemo.conversations.Conversation;
 import pl.apps.gptdemo.gptdemo.conversations.ConversationItems;
 import pl.apps.gptdemo.gptdemo.conversations.ConversationRepositoryPort;
+import pl.apps.gptdemo.gptdemo.conversations.SystemPrompt;
 
 import java.util.List;
 
@@ -62,5 +63,10 @@ class ConversationRepositoryAdapter implements ConversationRepositoryPort {
                 .filter(conversationEntity -> conversationEntity.getDeleteDate() == null)
                 .map(conversationRepositoryMapper::mapToConversationWithoutItems)
                 .orElse(Conversation.empty());
+    }
+
+    @Override
+    public List<SystemPrompt> findSystemPromptsForAllConversations() {
+        return conversationJpaRepository.findSystemPromptsForAllConversations();
     }
 }

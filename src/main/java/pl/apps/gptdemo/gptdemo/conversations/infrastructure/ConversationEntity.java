@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,7 +42,7 @@ class ConversationEntity {
     @Column(name = "deleted_date")
     private LocalDateTime deleteDate;
 
-    @Column(name = "system_prompt")
+    @Column(name = "system_prompt", columnDefinition="TEXT")
     private String systemPrompt;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

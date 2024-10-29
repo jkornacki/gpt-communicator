@@ -1,7 +1,7 @@
 ### FOR IDEA INTELLIJ HTTP CLIENT
 
 ### SEND anthropic prompt
-POST http://localhost:7070/api/anthropic
+POST http://localhost:8070/api/anthropic
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
 
 
 ### SEND anthropic prompt
-POST http://localhost:7070/api/conversation/4/anthropic
+POST http://localhost:8070/api/conversation/4/anthropic
 Content-Type: application/json
 
 {
@@ -20,7 +20,10 @@ Content-Type: application/json
 
 
 ### GET all conversation
-GET http://localhost:7070/api/conversations
+GET http://localhost:8070/api/conversations
 
 ### GET conversation by ID
-GET http://localhost:7070/api/conversation/9
+GET http://localhost:8070/api/conversation/3
+
+### GET ALL SYSTEM prompts
+GET http://localhost:8070/api/systemPrompts

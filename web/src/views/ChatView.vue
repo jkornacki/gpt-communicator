@@ -11,7 +11,7 @@
 
       <!-- Main content area -->
       <div class="flex flex-1 overflow-hidden">
-        <nav class="bg-zinc-700 p-4 border-zinc-700" :style="{ width: navWidth }">
+        <nav class="bg-zinc-700 p-4 border-zinc-700 overflow-auto" :style="{ width: navWidth }">
           <router-link class="font-bold text-2xl dark:text-amber-300 text-amber-300 hover:underline" to="/">New Chat</router-link>
           <h2 class="text-2xl font-extrabold text-amber-100 border-b border-amber-300 pt-3 pb-2">Conversations:</h2>
           <div v-for="conversation in conversations" :key="conversation.id">
@@ -52,8 +52,14 @@
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-1">Send
                 </button>
 
-              </div>
+                <button
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-1"
+                    @click="isConversationSettingsOpen = !isConversationSettingsOpen"
+                >
+                  <font-awesome-icon icon="fa-solid fa-gears"/>
+                </button>
 
+              </div> <!-- buttons div -->
 
             </div>
 
@@ -62,6 +68,12 @@
       </div>
     </div>
   </div>
+  <ConversationSettingsModal
+      :is-open="isConversationSettingsOpen"
+      :conversation-id="conversationId !== undefined ? conversationId : -1"
+      @update:isOpen="isConversationSettingsOpen = $event"
+      @update:systemPrompt="customSystemPrompt = $event"
+  />
 </template>
 
 <script>
@@ -71,10 +83,11 @@ import {GptApiService} from "@/services/GptApiService.js";
 import Conversations from "@/components/Conversations.vue";
 import {useRoute, useRouter} from "vue-router";
 import ConversationItem from "@/components/ConversationItem.vue";
+import ConversationSettingsModal from "@/components/ConversationSettingsModal.vue";
 
 export default defineComponent({
   name: "ChatView",
-  components: {ConversationItem, Conversations},
+  components: {ConversationSettingsModal, ConversationItem, Conversations},
   setup() {
     const isSendBtnDisable = ref(false);
     const route = useRoute();
@@ -83,6 +96,7 @@ export default defineComponent({
 
     const conversations = ref([]);
     const conversationItems = ref([]);
+    const customSystemPrompt = ref("");
 
 
     const scrollToBottom = () => {
@@ -115,15 +129,26 @@ export default defineComponent({
     const handleSend = () => {
       const textarea = document.getElementById('prompt-ta');
       if (textarea) {
+
+        if(textarea.value === "") {
+          alert("Empty prompt");
+          return;
+        }
         isSendBtnDisable.value = true;
         const content = textarea.value;
         console.log('Prompt content:', content);
+        console.log('Custom system prompt:', customSystemPrompt.value);
 
-
-        GptApiService.sendAnthropicPrompt(
-            {
-              "prompt": content,
-            },
+        let apiRequest = {
+          "prompt": content
+        }
+        if(customSystemPrompt.value !== "") {
+          apiRequest = {
+            "prompt": content,
+            "systemPrompt": customSystemPrompt.value
+          }
+        }
+        GptApiService.sendAnthropicPrompt(apiRequest,
             conversationId.value
         ).then(response => {
           isSendBtnDisable.value = false;
@@ -293,6 +318,9 @@ export default defineComponent({
       console.log(`stopResizePrompt Resize Prompt: ${promptHeight.value} promptHeightTAVal: ${promptHeightTA.value}`);
     };
 
+    const isConversationSettingsOpen = ref(false);
+
+
     return {
       isSendBtnDisable,
       conversations,
@@ -305,7 +333,9 @@ export default defineComponent({
       startResize,
       startResizePrompt,
       promptHeight,
-      promptHeightTA
+      promptHeightTA,
+      isConversationSettingsOpen,
+      customSystemPrompt
     };
   }
 });
@@ -321,7 +351,6 @@ export default defineComponent({
   }
 }
 
-/* Add some styles for the copy button */
 .copy-btn {
   position: absolute;
   top: 4px;
@@ -347,14 +376,15 @@ pre {
   width: 4px;
   height: 100%;
   cursor: col-resize;
-  //background-color: #333;;
-  background-color: rgb(252, 211, 77, .9);
+  background-color: #333;
+  //background-color: rgb(252, 211, 77, .9);
 }
 
 .prompt-resizer {
   width: 100%;
   height: 4px;
   cursor: row-resize;
-  background-color: rgba(252, 211, 77, .9);
+  background-color: #333;
+  //background-color: rgba(252, 211, 77, .9);
 }
 </style>

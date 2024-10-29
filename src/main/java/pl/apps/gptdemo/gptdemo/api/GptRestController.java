@@ -61,14 +61,15 @@ public class GptRestController {
 
     @PostMapping("/api/anthropic")
     PromptApiResponse callAnthropicApi(
-            @RequestBody ApiRequest request,
-            @RequestParam(value = "systemPrompt", required = false) String systemPrompt) {
-        return handleCallAnthropicApi(() -> conversationService.sendPromptForNewConversation(request.prompt(), systemPrompt), request.prompt());
+            @RequestBody ApiRequest request) {
+        return handleCallAnthropicApi(() -> conversationService.sendPromptForNewConversation(request.prompt(), request.systemPrompt()), request.prompt());
     }
 
     @PostMapping("/api/conversation/{id}/anthropic")
-    PromptApiResponse callAnthropicApiInConversation(@PathVariable("id") Long conversationId, @RequestBody ApiRequest request) {
-        return handleCallAnthropicApi(() -> conversationService.sendPromptForExistingConversation(conversationId, request.prompt()), request.prompt());
+    PromptApiResponse callAnthropicApiInConversation(@PathVariable("id") Long conversationId,
+                                                     @RequestBody ApiRequest request
+    ) {
+        return handleCallAnthropicApi(() -> conversationService.sendPromptForExistingConversation(conversationId, request.prompt(), request.systemPrompt()), request.prompt());
     }
 
     @DeleteMapping("/api/conversation/{id}")
@@ -76,10 +77,14 @@ public class GptRestController {
         conversationService.deleteConversation(conversationId);
     }
 
+    @GetMapping("/api/systemPrompts")
+    List<SystemPromptDto> getSystemPrompts(@RequestParam(required = false, name = "conversationId") Long conversationId) {
+        return conversationService.getSystemPrompts(conversationId);
+    }
+
     private PromptApiResponse handleCallAnthropicApi(Supplier<PromptApiResponse> apiCall, String prompt) {
         PromptApiResponse response = apiCall.get();
         log.info("claudeApiClientResponse for prompt: {}\n{}", prompt, response);
         return response;
     }
-
 }

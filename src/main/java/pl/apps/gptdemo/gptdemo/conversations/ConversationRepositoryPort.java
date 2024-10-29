@@ -12,4 +12,5 @@ public interface ConversationRepositoryPort {
 
     Conversation getConversationWithoutItems(Long conversationId);
 
+    List<SystemPrompt> findSystemPromptsForAllConversations();
 }
