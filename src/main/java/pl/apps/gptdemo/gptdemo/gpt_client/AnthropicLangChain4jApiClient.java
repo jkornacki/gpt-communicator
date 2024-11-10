@@ -5,7 +5,6 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
-import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.anthropic.internal.api.AnthropicApi;
 import dev.langchain4j.model.anthropic.internal.client.DefaultAnthropicClient;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -39,36 +38,26 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
     private final GptConfiguration configuration;
 
     public AnthropicLangChain4jApiClient(GptConfiguration configuration) {
-        this(
-                configuration.getSkipSsl(),
-                configuration.getApiKey(),
-                configuration.getProxyHost(),
-                configuration.getProxyPort(),
-                configuration
-        );
-    }
-
-    private AnthropicLangChain4jApiClient(Boolean skipSSL,
-                                          String apiKey,
-                                          String proxyHost,
-                                          String proxyPort,
-                                          GptConfiguration configuration
-    ) {
 
         this.model = AnthropicChatModel.builder()
-                .apiKey(apiKey)
-                .modelName(AnthropicChatModelName.CLAUDE_3_5_SONNET_20240620)
+                .apiKey(configuration.getApiKey())
+                .modelName(configuration.getDefaultAnthropicModel())
                 .logRequests(true)
                 .logResponses(true)
                 .timeout(Duration.ofSeconds(configuration.getAnthropicTimeoutInSec()))
                 .maxTokens(configuration.getAnthropicMaxTokens())
+                .temperature(configuration.getAnthropicTemperature())
                 .build();
-        if (skipSSL) {
+        if (configuration.getSkipSsl()) {
             var apiUrl = ANTHROPIC_BASE_USR;
-            var insecureOkHttpClient = createInsecureOkHttpClient(proxyHost, proxyPort, configuration.getAnthropicTimeoutInSec());
+            var insecureOkHttpClient = createInsecureOkHttpClient(
+                    configuration.getProxyHost(),
+                    configuration.getProxyPort(),
+                    configuration.getAnthropicTimeoutInSec()
+            );
             var client = DefaultAnthropicClient.builder()
                     .baseUrl(apiUrl)
-                    .apiKey(apiKey)
+                    .apiKey(configuration.getApiKey())
                     .version("2023-06-01")
                     .beta("tools-2024-04-04")
                     .timeout(Duration.ofSeconds(configuration.getAnthropicTimeoutInSec()))
@@ -88,7 +77,6 @@ class AnthropicLangChain4jApiClient implements GptApiClient {
         }
 
         this.configuration = configuration;
-
     }
 
     public interface AiAssistant {
