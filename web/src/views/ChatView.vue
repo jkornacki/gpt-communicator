@@ -37,7 +37,7 @@
 
           <div class="prompt-resizer" @mousedown="startResizePrompt"></div>
 
-          <footer class="bg-gray-100 p-4 border-t flex justify-center items-center " style=" overflow: scroll !important;">
+          <footer class="bg-gray-100 pl-2 pr-2 border-t flex justify-center items-center " style=" overflow: scroll !important;">
             <div class="text-black w-full" :style="{height: promptHeight}">
               <h3 class="font-bold text-lg">Prompt</h3>
               <textarea id="prompt-ta"
@@ -302,7 +302,7 @@ export default defineComponent({
 
     const resizePrompt = (event) => {
       const height = self.innerHeight - event.clientY;
-      if (height > 139 && height < 700) {
+      if (height > 130 && height < 700) {
         const promptHeightTAVal = height - 80;
         promptHeight.value = `${height}px`;
         promptHeightTA.value = `${promptHeightTAVal}px`;
@@ -380,11 +380,21 @@ pre {
   //background-color: rgb(252, 211, 77, .9);
 }
 
+.resizer:hover {
+  background-color: #ccc;
+  width: 6px;
+}
+
 .prompt-resizer {
   width: 100%;
   height: 4px;
   cursor: row-resize;
   background-color: #333;
   //background-color: rgba(252, 211, 77, .9);
+}
+
+.prompt-resizer:hover {
+  background-color: #ccc;
+  height: 6px;
 }
 </style>
